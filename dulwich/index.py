@@ -599,7 +599,15 @@ def build_file_from_blob(
             # os.readlink on Python3 on Windows requires a unicode string.
             contents = contents.decode(tree_encoding)
             target_path = target_path.decode(tree_encoding)
-        os.symlink(contents, target_path)
+        try:
+            os.symlink(contents, target_path)
+        except Exception as e:
+            # If windows
+            print("Cannot create symlink.")
+            if sys.platform == "win32":
+                print("Have you tried enabling Windows developer mode?")
+            raise e
+            
     else:
         if oldstat is not None and oldstat.st_size == len(contents):
             with open(target_path, "rb") as f:
